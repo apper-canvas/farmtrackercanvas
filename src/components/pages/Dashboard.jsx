@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import TaskWidget from "@/components/organisms/TaskWidget";
 import { Card, CardContent, CardHeader } from "@/components/atoms/Card";
 import { Link } from "react-router-dom";
-import taskService from "@/services/api/taskService";
 import { format } from "date-fns";
+import taskService from "@/services/api/taskService";
 import fieldService from "@/services/api/fieldService";
 import activityService from "@/services/api/activityService";
 import ApperIcon from "@/components/ApperIcon";
+import TaskWidget from "@/components/organisms/TaskWidget";
 import WeatherWidget from "@/components/organisms/WeatherWidget";
 import MetricCard from "@/components/molecules/MetricCard";
 import StatusBadge from "@/components/molecules/StatusBadge";
@@ -187,13 +187,14 @@ const loadDashboardData = async () => {
                             size="sm" 
                             icon="Eye"
                           />
-                        </div>
+</div>
                       </div>
                     ))}
                   </div>
-</CardContent>
+                </div>
               )}
-            </Card>
+            </CardContent>
+          </Card>
           </div>
 
           {/* Recent Activity */}
@@ -242,7 +243,7 @@ const loadDashboardData = async () => {
                 )}
               </CardContent>
             </Card>
-          </div>
+</div>
         </div>
       </div>
     </div>
