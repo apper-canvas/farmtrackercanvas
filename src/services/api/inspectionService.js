@@ -250,10 +250,10 @@ class InspectionService {
       }
       
       return true;
-    } catch (error) {
+} catch (error) {
       console.error(`Error deleting inspection ${id}:`, error);
       throw new Error('Failed to delete inspection');
-throw new Error('Failed to delete inspection');
+    }
   }
 }
 
