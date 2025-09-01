@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from "react";
-import MetricCard from "@/components/molecules/MetricCard";
-import WeatherWidget from "@/components/organisms/WeatherWidget";
-import { Card, CardHeader, CardContent } from "@/components/atoms/Card";
-import Button from "@/components/atoms/Button";
-import StatusBadge from "@/components/molecules/StatusBadge";
-import ApperIcon from "@/components/ApperIcon";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
+import React, { useEffect, useState } from "react";
+import TaskWidget from "@/components/organisms/TaskWidget";
+import { Card, CardContent, CardHeader } from "@/components/atoms/Card";
 import { Link } from "react-router-dom";
+import taskService from "@/services/api/taskService";
+import { format } from "date-fns";
 import fieldService from "@/services/api/fieldService";
 import activityService from "@/services/api/activityService";
-import { format } from "date-fns";
+import ApperIcon from "@/components/ApperIcon";
+import WeatherWidget from "@/components/organisms/WeatherWidget";
+import MetricCard from "@/components/molecules/MetricCard";
+import StatusBadge from "@/components/molecules/StatusBadge";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import Fields from "@/components/pages/Fields";
+import Button from "@/components/atoms/Button";
 
 const Dashboard = () => {
-  const [fields, setFields] = useState([]);
+const [fields, setFields] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -22,18 +26,20 @@ const Dashboard = () => {
     loadDashboardData();
   }, []);
 
-  const loadDashboardData = async () => {
+const loadDashboardData = async () => {
     try {
       setLoading(true);
       setError("");
       
-      const [fieldsData, activitiesData] = await Promise.all([
+      const [fieldsData, activitiesData, tasksData] = await Promise.all([
         fieldService.getAll(),
-        activityService.getAll()
+        activityService.getAll(),
+        taskService.getAll()
       ]);
       
       setFields(fieldsData);
       setActivities(activitiesData.slice(0, 5)); // Get recent activities
+      setTasks(tasksData);
     } catch (err) {
       setError("Failed to load dashboard data");
       console.error("Dashboard error:", err);
@@ -161,7 +167,7 @@ const Dashboard = () => {
                   </div>
 
                   <div className="space-y-3">
-                    {fields.slice(0, 5).map((field) => (
+{fields.slice(0, 5).map((field) => (
                       <div key={field.Id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center space-x-3">
                           <div className="p-2 bg-white rounded-lg">
@@ -185,58 +191,60 @@ const Dashboard = () => {
                       </div>
                     ))}
                   </div>
-
-                  {fields.length > 5 && (
-                    <div className="text-center pt-4">
-                      <Button as={Link} to="/fields" variant="outline">
-                        View All {fields.length} Fields
-                      </Button>
-                    </div>
-                  )}
-                </div>
+</CardContent>
               )}
-            </CardContent>
-          </Card>
-        </div>
+            </Card>
+          </div>
 
-        {/* Weather Widget */}
-        <div>
-          <WeatherWidget />
+          {/* Recent Activity */}
+          <div>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-2 bg-green-50 rounded-lg">
+                      <ApperIcon name="Activity" className="w-5 h-5 text-fresh" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                      <p className="text-sm text-gray-600">Latest field activities</p>
+                    </div>
+                  </div>
+                  <Button as={Link} to="/reports" variant="ghost" size="sm" icon="ArrowRight">
+                    View All
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {activities.length === 0 ? (
+                  <div className="text-center py-8">
+                    <ApperIcon name="Activity" className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">No Recent Activity</h4>
+                    <p className="text-gray-600">Activity will appear here as you manage your fields</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {activities.map((activity) => (
+                      <div key={activity.Id} className="flex items-start space-x-3">
+                        <div className="p-2 bg-gray-100 rounded-full">
+                          <ApperIcon 
+                            name={activity.type === "inspection" ? "ClipboardList" : "Activity"} 
+                            className="w-4 h-4 text-gray-600" 
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-gray-900">{activity.description}</p>
+                          <p className="text-sm text-gray-500">{formatDate(activity.timestamp)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-gray-900 font-display">Recent Activity</h3>
-        </CardHeader>
-        <CardContent>
-          {activities.length === 0 ? (
-            <div className="text-center py-8">
-              <ApperIcon name="Activity" className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h4 className="text-lg font-medium text-gray-900 mb-2">No Recent Activity</h4>
-              <p className="text-gray-600">Activity will appear here as you manage your fields</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {activities.map((activity) => (
-                <div key={activity.Id} className="flex items-start space-x-3">
-                  <div className="p-2 bg-gray-100 rounded-full">
-                    <ApperIcon 
-                      name={activity.type === "inspection" ? "ClipboardList" : "Activity"} 
-                      className="w-4 h-4 text-gray-600" 
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-gray-900">{activity.description}</p>
-                    <p className="text-sm text-gray-500">{formatDate(activity.timestamp)}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 };

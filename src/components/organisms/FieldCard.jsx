@@ -5,7 +5,7 @@ import StatusBadge from "@/components/molecules/StatusBadge";
 import ApperIcon from "@/components/ApperIcon";
 import { format } from "date-fns";
 
-const FieldCard = ({ field, onView, onEdit }) => {
+const FieldCard = ({ field, onView, onEdit, onAddTask }) => {
   const getCropIcon = (cropType) => {
     const icons = {
       corn: "Wheat",
@@ -83,7 +83,7 @@ const FieldCard = ({ field, onView, onEdit }) => {
           </div>
         </div>
 
-        <div className="flex gap-2">
+<div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -101,6 +101,17 @@ const FieldCard = ({ field, onView, onEdit }) => {
           >
             Edit
           </Button>
+          {onAddTask && (
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="Plus"
+              onClick={() => onAddTask(field)}
+              title="Add Task"
+            >
+              Task
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
