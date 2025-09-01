@@ -102,10 +102,10 @@ class FieldService {
           Name: fieldData.name,
           size_c: parseFloat(fieldData.size),
           crop_type_c: fieldData.cropType,
-planting_date_c: fieldData.plantingDate ? new Date(fieldData.plantingDate).toISOString() : null,
+planting_date_c: safeISODate(fieldData.plantingDate),
           growth_stage_c: fieldData.growthStage,
           status_c: fieldData.status,
-          last_inspection_c: fieldData.lastInspection || new Date().toISOString().split('T')[0],
+last_inspection_c: fieldData.lastInspection || new Date().toISOString().split('T')[0],
           notes_c: Array.isArray(fieldData.notes) ? fieldData.notes.join('\n') : (fieldData.notes || '')
         }]
       };
@@ -158,10 +158,25 @@ planting_date_c: fieldData.plantingDate ? new Date(fieldData.plantingDate).toISO
       if (data.name !== undefined) updateData.Name = data.name;
       if (data.size !== undefined) updateData.size_c = parseFloat(data.size);
       if (data.cropType !== undefined) updateData.crop_type_c = data.cropType;
-if (data.plantingDate !== undefined) updateData.planting_date_c = data.plantingDate ? new Date(data.plantingDate).toISOString() : null;
+if (data.plantingDate !== undefined) updateData.planting_date_c = safeISODate(data.plantingDate);
       if (data.growthStage !== undefined) updateData.growth_stage_c = data.growthStage;
       if (data.status !== undefined) updateData.status_c = data.status;
-      if (data.lastInspection !== undefined) updateData.last_inspection_c = data.lastInspection;
+if (data.lastInspection !== undefined) updateData.last_inspection_c = data.lastInspection;
+
+// Utility function for safe date conversion
+function safeISODate(dateValue) {
+  if (!dateValue || dateValue === '') return null;
+  
+  try {
+    const date = new Date(dateValue);
+    // Check if date is valid
+    if (isNaN(date.getTime())) return null;
+    return date.toISOString();
+  } catch (error) {
+    console.error('Invalid date format:', dateValue);
+    return null;
+  }
+}
       if (data.notes !== undefined) updateData.notes_c = Array.isArray(data.notes) ? data.notes.join('\n') : (data.notes || '');
       
       const params = {
