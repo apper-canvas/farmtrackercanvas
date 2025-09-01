@@ -1,5 +1,4 @@
 import equipmentData from "@/services/mockData/equipment.json";
-
 class EquipmentService {
   constructor() {
     this.equipment = [...equipmentData];
@@ -73,7 +72,7 @@ class EquipmentService {
       operator: usageData.operator || '',
       notes: usageData.notes || '',
       maintenancePerformed: usageData.maintenancePerformed || false
-    };
+};
 
     if (!equipment.usageLogs) {
       equipment.usageLogs = [];
@@ -87,9 +86,71 @@ class EquipmentService {
     // Update maintenance status based on hours
     if (equipment.totalHours >= equipment.nextMaintenanceHours) {
       equipment.status = 'Maintenance Due';
-    }
+}
 
     return { ...equipment };
+  }
+
+  async scheduleMaintenance(id, maintenanceData) {
+    await this.delay(500);
+    
+    const equipment = this.equipment.find(item => item.Id === parseInt(id));
+    if (!equipment) {
+      throw new Error('Equipment not found');
+    }
+
+    const maintenanceRecord = {
+      Id: Date.now(),
+      equipmentId: equipment.Id,
+      serviceType: maintenanceData.type,
+      date: maintenanceData.scheduledDate + 'T10:00:00Z',
+      estimatedCost: parseFloat(maintenanceData.estimatedCost) || 0,
+      priority: maintenanceData.priority,
+      notes: maintenanceData.notes,
+      status: 'scheduled',
+      createdDate: new Date().toISOString()
+    };
+
+    // Initialize maintenance history if it doesn't exist
+    if (!equipment.maintenanceHistory) {
+      equipment.maintenanceHistory = [];
+    }
+
+    equipment.maintenanceHistory.push(maintenanceRecord);
+return maintenanceRecord;
+  }
+
+  async getMaintenanceHistory() {
+    await this.delay(300);
+    
+    const allRecords = [];
+    this.equipment.forEach(equipment => {
+      if (equipment.maintenanceHistory) {
+        allRecords.push(...equipment.maintenanceHistory);
+      }
+    });
+    });
+return allRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+
+  async updateMaintenanceRecord(id, updates) {
+    await this.delay(400);
+    
+    for (let equipment of this.equipment) {
+      if (equipment.maintenanceHistory) {
+        const recordIndex = equipment.maintenanceHistory.findIndex(record => record.Id === parseInt(id));
+        const recordIndex = equipment.maintenanceHistory.findIndex(record => record.Id === parseInt(id));
+        if (recordIndex !== -1) {
+          equipment.maintenanceHistory[recordIndex] = {
+            ...equipment.maintenanceHistory[recordIndex],
+            ...updates,
+            updatedDate: new Date().toISOString()
+          };
+          return equipment.maintenanceHistory[recordIndex];
+        }
+      }
+    }
+throw new Error('Maintenance record not found');
   }
 
   delay(ms) {
