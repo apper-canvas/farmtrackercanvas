@@ -197,53 +197,52 @@ const loadDashboardData = async () => {
 </Card>
         </div>
 
-        {/* Recent Activity */}
-          <div>
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="p-2 bg-green-50 rounded-lg">
-                      <ApperIcon name="Activity" className="w-5 h-5 text-fresh" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-                      <p className="text-sm text-gray-600">Latest field activities</p>
-                    </div>
+{/* Recent Activity */}
+        <div>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="p-2 bg-green-50 rounded-lg">
+                    <ApperIcon name="Activity" className="w-5 h-5 text-fresh" />
                   </div>
-                  <Button as={Link} to="/reports" variant="ghost" size="sm" icon="ArrowRight">
-                    View All
-                  </Button>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                    <p className="text-sm text-gray-600">Latest field activities</p>
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {activities.length === 0 ? (
-                  <div className="text-center py-8">
-                    <ApperIcon name="Activity" className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">No Recent Activity</h4>
-                    <p className="text-gray-600">Activity will appear here as you manage your fields</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {activities.map((activity) => (
-                      <div key={activity.Id} className="flex items-start space-x-3">
-                        <div className="p-2 bg-gray-100 rounded-full">
-                          <ApperIcon 
-                            name={activity.type === "inspection" ? "ClipboardList" : "Activity"} 
-                            className="w-4 h-4 text-gray-600" 
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-gray-900">{activity.description}</p>
-                          <p className="text-sm text-gray-500">{formatDate(activity.timestamp)}</p>
-                        </div>
+                <Button as={Link} to="/reports" variant="ghost" size="sm" icon="ArrowRight">
+                  View All
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {activities.length === 0 ? (
+                <div className="text-center py-8">
+                  <ApperIcon name="Activity" className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">No Recent Activity</h4>
+                  <p className="text-gray-600">Activity will appear here as you manage your fields</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {activities.map((activity) => (
+                    <div key={activity.Id} className="flex items-start space-x-3">
+                      <div className="p-2 bg-gray-100 rounded-full">
+                        <ApperIcon 
+                          name={activity.type === "inspection" ? "ClipboardList" : "Activity"} 
+                          className="w-4 h-4 text-gray-600" 
+                        />
                       </div>
-                    ))}
-                  </div>
-                )}
-</CardContent>
-            </Card>
-          </div>
+                      <div className="flex-1">
+                        <p className="text-gray-900">{activity.description}</p>
+                        <p className="text-sm text-gray-500">{formatDate(activity.timestamp)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
