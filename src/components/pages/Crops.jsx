@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardContent } from "@/components/atoms/Card";
-import Button from "@/components/atoms/Button";
-import ApperIcon from "@/components/ApperIcon";
-import cropScheduleService from "@/services/api/cropScheduleService";
-import fieldService from "@/services/api/fieldService";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader } from "@/components/atoms/Card";
 import { toast } from "react-toastify";
+import fieldService from "@/services/api/fieldService";
+import cropScheduleService from "@/services/api/cropScheduleService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import Select from "@/components/atoms/Select";
+import Button from "@/components/atoms/Button";
 
 const Crops = () => {
   const [schedules, setSchedules] = useState([]);
@@ -110,11 +112,13 @@ const Crops = () => {
     setDraggedEvent(null);
   };
 
-  const handleAddSchedule = async (scheduleData) => {
+const handleAddSchedule = async (scheduleData) => {
     try {
+      // Prevent null reference error by using fallback date
+      const dateToUse = selectedDate || new Date();
       const newSchedule = await cropScheduleService.create({
         ...scheduleData,
-        date: selectedDate.toISOString().split('T')[0]
+        date: dateToUse.toISOString().split('T')[0]
       });
       setSchedules(prev => [...prev, newSchedule]);
       setShowAddModal(false);
@@ -168,9 +172,15 @@ const Crops = () => {
         </div>
         <div className="mt-4 md:mt-0 flex gap-2">
           <Button 
-            variant="outline" 
+variant="outline" 
             icon="Plus" 
-            onClick={() => setShowAddModal(true)}
+            onClick={() => {
+              // Set default date for Quick Add to prevent null errors
+              if (!selectedDate) {
+                setSelectedDate(new Date());
+              }
+              setShowAddModal(true);
+            }}
           >
             Quick Add
           </Button>
@@ -295,7 +305,7 @@ const Crops = () => {
         </CardContent>
       </Card>
 
-      {/* Quick Add Modal */}
+{/* Quick Add Modal */}
       {showAddModal && (
         <AddScheduleModal
           isOpen={showAddModal}
@@ -312,159 +322,211 @@ const Crops = () => {
   );
 };
 
-// Add Schedule Modal Component
-const AddScheduleModal = ({ isOpen, onClose, onAdd, selectedDate, fields }) => {
+// AddScheduleModal Component Implementation
+const AddScheduleModal = ({ isOpen, onClose, onAdd, selectedDate, fields = [] }) => {
   const [formData, setFormData] = useState({
     cropName: '',
-    variety: '',
     type: 'planting',
     fieldId: '',
     notes: '',
-    expectedYield: ''
+    priority: 'medium'
   });
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const cropOptions = [
-    'Tomatoes', 'Lettuce', 'Carrots', 'Peas', 'Beans', 'Squash',
-    'Peppers', 'Cucumbers', 'Corn', 'Broccoli', 'Spinach', 'Radishes'
-  ];
+  // Reset form when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        cropName: '',
+        type: 'planting',
+        fieldId: '',
+        notes: '',
+        priority: 'medium'
+      });
+      setErrors({});
+    }
+  }, [isOpen]);
 
-  const handleSubmit = (e) => {
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.cropName.trim()) {
+      newErrors.cropName = 'Crop name is required';
+    }
+    
+    if (!formData.fieldId) {
+      newErrors.fieldId = 'Please select a field';
+    }
+    
+    if (!selectedDate) {
+      newErrors.date = 'Please select a date';
+    }
+    
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.cropName || !formData.fieldId) {
-      toast.error('Please fill in all required fields');
+    
+    const formErrors = validateForm();
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
       return;
     }
-    onAdd(formData);
-    setFormData({
-      cropName: '',
-      variety: '',
-      type: 'planting',
-      fieldId: '',
-      notes: '',
-      expectedYield: ''
-    });
+
+    setIsSubmitting(true);
+    try {
+      await onAdd(formData);
+    } catch (error) {
+      console.error('Submit error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-md mx-4">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">
-              Add Crop Schedule - {selectedDate?.toLocaleDateString()}
-            </h3>
-            <Button variant="ghost" size="icon" icon="X" onClick={onClose} />
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">Add Crop Schedule</h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              type="button"
+            >
+              <ApperIcon name="X" size={20} />
+            </button>
           </div>
-        </CardHeader>
-        <CardContent>
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Crop Type *
-              </label>
-              <select
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest focus:border-forest"
-                value={formData.cropName}
-                onChange={(e) => setFormData(prev => ({ ...prev, cropName: e.target.value }))}
-                required
-              >
-                <option value="">Select crop...</option>
-                {cropOptions.map(crop => (
-                  <option key={crop} value={crop}>{crop}</option>
-                ))}
-              </select>
+            {/* Selected Date Display */}
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p className="text-sm font-medium text-gray-700">
+                Selected Date: {selectedDate ? selectedDate.toLocaleDateString() : 'No date selected'}
+              </p>
+              {errors.date && <p className="text-sm text-red-600 mt-1">{errors.date}</p>}
             </div>
 
+            {/* Crop Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Variety
+                Crop Name *
               </label>
               <input
                 type="text"
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest focus:border-forest"
-                value={formData.variety}
-                onChange={(e) => setFormData(prev => ({ ...prev, variety: e.target.value }))}
-                placeholder="e.g., Cherokee Purple"
+                value={formData.cropName}
+                onChange={(e) => handleInputChange('cropName', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fresh focus:border-fresh"
+                placeholder="Enter crop name"
               />
+              {errors.cropName && <p className="text-sm text-red-600 mt-1">{errors.cropName}</p>}
             </div>
 
+            {/* Activity Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Type *
+                Activity Type
               </label>
               <select
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest focus:border-forest"
                 value={formData.type}
-                onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
-                required
+                onChange={(e) => handleInputChange('type', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fresh focus:border-fresh"
               >
                 <option value="planting">Planting</option>
-                <option value="harvest">Harvest</option>
+                <option value="watering">Watering</option>
+                <option value="fertilizing">Fertilizing</option>
+                <option value="harvesting">Harvesting</option>
+                <option value="pruning">Pruning</option>
+                <option value="pest-control">Pest Control</option>
               </select>
             </div>
 
+            {/* Field Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Field *
               </label>
               <select
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest focus:border-forest"
                 value={formData.fieldId}
-                onChange={(e) => setFormData(prev => ({ ...prev, fieldId: parseInt(e.target.value) }))}
-                required
+                onChange={(e) => handleInputChange('fieldId', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fresh focus:border-fresh"
               >
-                <option value="">Select field...</option>
+                <option value="">Select a field</option>
                 {fields.map(field => (
                   <option key={field.Id} value={field.Id}>
                     {field.name} ({field.size} acres)
                   </option>
                 ))}
               </select>
+              {errors.fieldId && <p className="text-sm text-red-600 mt-1">{errors.fieldId}</p>}
             </div>
 
-            {formData.type === 'harvest' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Expected Yield
-                </label>
-                <input
-                  type="text"
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest focus:border-forest"
-                  value={formData.expectedYield}
-                  onChange={(e) => setFormData(prev => ({ ...prev, expectedYield: e.target.value }))}
-                  placeholder="e.g., 50 lbs"
-                />
-              </div>
-            )}
+            {/* Priority */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Priority
+              </label>
+              <select
+                value={formData.priority}
+                onChange={(e) => handleInputChange('priority', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fresh focus:border-fresh"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
 
+            {/* Notes */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Notes
               </label>
               <textarea
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest focus:border-forest"
-                rows={3}
                 value={formData.notes}
-                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                onChange={(e) => handleInputChange('notes', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fresh focus:border-fresh"
+                rows={3}
                 placeholder="Additional notes..."
               />
             </div>
 
-            <div className="flex gap-2">
-              <Button type="submit" className="flex-1">
-                Add Schedule
-              </Button>
-              <Button type="button" variant="outline" onClick={onClose}>
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                className="flex-1"
+                disabled={isSubmitting}
+              >
                 Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Adding...' : 'Add Schedule'}
               </Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
-
 export default Crops;
