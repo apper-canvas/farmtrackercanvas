@@ -1,0 +1,150 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import 'react-toastify/dist/ReactToastify.css';
+
+/* Custom toast styling */
+.Toastify__toast-container {
+  z-index: 9999;
+  width: 320px;
+}
+
+.Toastify__toast {
+  min-height: 64px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.Toastify__toast--success {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+}
+
+.Toastify__toast--error {
+  background: linear-gradient(135deg, #EF5350 0%, #e53935 100%);
+}
+
+.Toastify__toast--warning {
+  background: linear-gradient(135deg, #FFA726 0%, #ff9800 100%);
+}
+
+.Toastify__toast--info {
+  background: linear-gradient(135deg, #29B6F6 0%, #039be5 100%);
+}
+
+.Toastify__close-button {
+  color: white;
+  opacity: 0.8;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Base styles */
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.font-display {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Gradient text utilities */
+.gradient-text {
+  background: linear-gradient(135deg, #2D5016 0%, #7CB342 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.2s ease-out;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Button hover effects */
+.btn-hover {
+  transition: all 0.2s ease-out;
+}
+
+.btn-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  filter: brightness(1.05);
+}
+
+/* Status indicators */
+.status-healthy {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+}
+
+.status-attention {
+  background: linear-gradient(135deg, #FFA726 0%, #ff9800 100%);
+}
+
+.status-harvest {
+  background: linear-gradient(135deg, #FF6F00 0%, #e65100 100%);
+}
+
+.status-inactive {
+  background: linear-gradient(135deg, #9E9E9E 0%, #757575 100%);
+}
