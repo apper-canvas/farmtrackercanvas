@@ -194,10 +194,10 @@ const loadDashboardData = async () => {
                 </div>
               )}
             </CardContent>
-          </Card>
-          </div>
+</Card>
+        </div>
 
-          {/* Recent Activity */}
+        {/* Recent Activity */}
           <div>
             <Card>
               <CardHeader>
@@ -241,9 +241,9 @@ const loadDashboardData = async () => {
                     ))}
                   </div>
                 )}
-              </CardContent>
+</CardContent>
             </Card>
-</div>
+          </div>
         </div>
       </div>
     </div>
