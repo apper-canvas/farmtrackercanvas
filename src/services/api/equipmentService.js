@@ -127,18 +127,16 @@ return maintenanceRecord;
     this.equipment.forEach(equipment => {
       if (equipment.maintenanceHistory) {
         allRecords.push(...equipment.maintenanceHistory);
-      }
+}
     });
-    });
-return allRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+    return allRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
   }
 
   async updateMaintenanceRecord(id, updates) {
     await this.delay(400);
     
     for (let equipment of this.equipment) {
-      if (equipment.maintenanceHistory) {
-        const recordIndex = equipment.maintenanceHistory.findIndex(record => record.Id === parseInt(id));
+if (equipment.maintenanceHistory) {
         const recordIndex = equipment.maintenanceHistory.findIndex(record => record.Id === parseInt(id));
         if (recordIndex !== -1) {
           equipment.maintenanceHistory[recordIndex] = {
