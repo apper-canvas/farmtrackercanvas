@@ -6,6 +6,7 @@ import Dashboard from "@/components/pages/Dashboard";
 import Fields from "@/components/pages/Fields";
 import Crops from "@/components/pages/Crops";
 import Equipment from "@/components/pages/Equipment";
+import Alerts from "@/components/pages/Alerts";
 import Reports from "@/components/pages/Reports";
 import Settings from "@/components/pages/Settings";
 
@@ -13,11 +14,12 @@ function App() {
   return (
     <div className="App">
       <Routes>
-        <Route path="/" element={<Layout />}>
+<Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="fields" element={<Fields />} />
           <Route path="crops" element={<Crops />} />
           <Route path="equipment" element={<Equipment />} />
+          <Route path="alerts" element={<Alerts />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
         </Route>

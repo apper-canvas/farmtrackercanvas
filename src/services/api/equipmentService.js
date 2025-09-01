@@ -120,16 +120,64 @@ class EquipmentService {
 return maintenanceRecord;
   }
 
-  async getMaintenanceHistory() {
+async getMaintenanceHistory() {
     await this.delay(300);
     
     const allRecords = [];
     this.equipment.forEach(equipment => {
       if (equipment.maintenanceHistory) {
         allRecords.push(...equipment.maintenanceHistory);
-}
+      }
     });
     return allRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+
+  async getMaintenanceAlerts() {
+    await this.delay(300);
+    
+    const alerts = [];
+    const currentDate = new Date();
+    
+    this.equipment.forEach(equipment => {
+      const nextMaintenanceDate = new Date(equipment.nextMaintenance);
+      const daysUntilMaintenance = Math.ceil((nextMaintenanceDate - currentDate) / (1000 * 60 * 60 * 24));
+      const hoursUntilMaintenance = equipment.nextMaintenanceHours - equipment.totalHours;
+      
+      let priority = 'low';
+      let status = 'upcoming';
+      
+      if (daysUntilMaintenance < 0 || hoursUntilMaintenance <= 0) {
+        priority = 'high';
+        status = 'overdue';
+      } else if (daysUntilMaintenance <= 7 || hoursUntilMaintenance <= 50) {
+        priority = 'medium';
+        status = 'due-soon';
+      }
+      
+      if (daysUntilMaintenance <= 30 || hoursUntilMaintenance <= 100) {
+        alerts.push({
+          Id: `alert-${equipment.Id}`,
+          equipmentId: equipment.Id,
+          equipmentName: equipment.name,
+          equipmentType: equipment.type,
+          nextMaintenanceDate: equipment.nextMaintenance,
+          daysUntilMaintenance,
+          hoursUntilMaintenance,
+          priority,
+          status,
+          location: equipment.location,
+          lastMaintenance: equipment.lastMaintenance
+        });
+      }
+    });
+    
+    return alerts.sort((a, b) => {
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
+      if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+        return priorityOrder[b.priority] - priorityOrder[a.priority];
+      }
+      return a.daysUntilMaintenance - b.daysUntilMaintenance;
+    });
   }
 
   async updateMaintenanceRecord(id, updates) {

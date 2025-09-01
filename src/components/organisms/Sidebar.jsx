@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import ApperIcon from "@/components/ApperIcon";
 import { cn } from "@/utils/cn";
+import ApperIcon from "@/components/ApperIcon";
 
 const Sidebar = ({ className }) => {
   const location = useLocation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-
+  
   const navigationItems = [
     {
       name: "Dashboard",
