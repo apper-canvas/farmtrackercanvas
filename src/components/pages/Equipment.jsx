@@ -195,6 +195,48 @@ const handleLogUsage = (equipment) => {
     );
   }
 
+// ROI Analysis functions
+  const handleExportData = async (format) => {
+    try {
+      setExportLoading(true);
+      const exportData = await equipmentService.exportROIData(format);
+      
+      let content, mimeType, filename;
+      
+      if (format === 'csv') {
+        content = exportData;
+        mimeType = 'text/csv';
+        filename = `equipment_roi_${new Date().toISOString().split('T')[0]}.csv`;
+      } else if (format === 'excel') {
+        content = exportData.content;
+        mimeType = exportData.mimeType;
+        filename = exportData.filename;
+      } else if (format === 'pdf') {
+        content = exportData.content;
+        mimeType = 'text/plain';
+        filename = exportData.filename;
+      }
+      
+      // Create download link
+      const blob = new Blob([content], { type: mimeType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success(`ROI data exported successfully as ${format.toUpperCase()}`);
+    } catch (error) {
+      console.error(`Error exporting ${format}:`, error);
+      toast.error(`Failed to export ${format.toUpperCase()} data`);
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -758,7 +800,122 @@ const handleLogUsage = (equipment) => {
           </Card>
         </div>
       )}
-{/* Schedule Maintenance Modal */}
+
+      {activeTab === 'roi' && (
+        <div className="p-6">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">ROI Analysis</h2>
+            <p className="text-gray-600">Financial analysis and cost calculations for tax reporting</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {equipment.map((item) => {
+              const roi = equipmentService.calculateROI(item);
+              return (
+                <Card key={item.Id} className="border hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-forest/10 rounded-lg">
+                          <ApperIcon name={getEquipmentIcon(item.type)} className="w-6 h-6 text-forest" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900">{item.name}</h3>
+                          <p className="text-sm text-gray-600">{item.type}</p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleExportData('csv')}
+                        disabled={exportLoading}
+                      >
+                        <ApperIcon name="Download" className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="text-center p-3 bg-forest/5 rounded-lg">
+                          <div className="text-lg font-bold text-forest">${roi.costPerHour}</div>
+                          <div className="text-xs text-gray-600">Cost/Hour</div>
+                        </div>
+                        <div className="text-center p-3 bg-amber/10 rounded-lg">
+                          <div className="text-lg font-bold text-amber">${roi.annualDepreciation?.toLocaleString()}</div>
+                          <div className="text-xs text-gray-600">Annual Depreciation</div>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="text-center p-3 bg-gray-50 rounded-lg">
+                          <div className={`text-lg font-bold ${roi.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {roi.roi}%
+                          </div>
+                          <div className="text-xs text-gray-600">ROI</div>
+                        </div>
+                        <div className="text-center p-3 bg-gray-50 rounded-lg">
+                          <div className="text-lg font-bold text-gray-700">{roi.depreciationRate}%</div>
+                          <div className="text-xs text-gray-600">Depreciation Rate</div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-gray-200">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Purchase Price:</span>
+                          <span className="font-medium">${item.purchasePrice?.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Current Value:</span>
+                          <span className="font-medium">${item.currentValue?.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Maintenance Cost:</span>
+                          <span className="font-medium">${roi.totalMaintenanceCost?.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm font-medium">
+                          <span className="text-gray-900">Total Cost:</span>
+                          <span>${roi.totalCostOfOwnership?.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          <div className="mt-8 flex gap-4">
+            <Button 
+              onClick={() => handleExportData('csv')}
+              disabled={exportLoading}
+              className="flex-1 sm:flex-none"
+            >
+              <ApperIcon name="FileText" className="w-4 h-4 mr-2" />
+              Export CSV
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => handleExportData('excel')}
+              disabled={exportLoading}
+              className="flex-1 sm:flex-none"
+            >
+              <ApperIcon name="FileSpreadsheet" className="w-4 h-4 mr-2" />
+              Export Excel
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => handleExportData('pdf')}
+              disabled={exportLoading}
+              className="flex-1 sm:flex-none"
+            >
+              <ApperIcon name="FileText" className="w-4 h-4 mr-2" />
+              Export PDF
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule Maintenance Modal */}
       {showMaintenanceModal && selectedEquipment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-2xl">
@@ -1118,172 +1275,7 @@ const handleLogUsage = (equipment) => {
         </div>
       )}
     </div>
-);
-
-  // ROI Analysis functions
-  const handleExportData = async (format) => {
-    try {
-      setExportLoading(true);
-      const exportData = await equipmentService.exportROIData(format);
-      
-      let content, mimeType, filename;
-      
-      if (format === 'csv') {
-        content = exportData;
-        mimeType = 'text/csv';
-        filename = `equipment_roi_${new Date().toISOString().split('T')[0]}.csv`;
-      } else if (format === 'excel') {
-        content = exportData.content;
-        mimeType = exportData.mimeType;
-        filename = exportData.filename;
-      } else if (format === 'pdf') {
-        content = exportData.content;
-        mimeType = 'text/plain';
-        filename = exportData.filename;
-      }
-      
-      // Create download link
-      const blob = new Blob([content], { type: mimeType });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      toast.success(`ROI data exported successfully as ${format.toUpperCase()}`);
-    } catch (error) {
-      console.error(`Error exporting ${format}:`, error);
-      toast.error(`Failed to export ${format.toUpperCase()} data`);
-    } finally {
-      setExportLoading(false);
-    }
-  };
-
-  // Add ROI tab content after history tab
-  const renderROITab = () => (
-    <div className="p-6">
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">ROI Analysis</h2>
-        <p className="text-gray-600">Financial analysis and cost calculations for tax reporting</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {equipment.map((item) => {
-          const roi = equipmentService.calculateROI(item);
-          return (
-            <Card key={item.Id} className="border hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-forest/10 rounded-lg">
-                      <ApperIcon name={getEquipmentIcon(item.type)} className="w-6 h-6 text-forest" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{item.name}</h3>
-                      <p className="text-sm text-gray-600">{item.type}</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleExportData('csv')}
-                    disabled={exportLoading}
-                  >
-                    <ApperIcon name="Download" className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="text-center p-3 bg-forest/5 rounded-lg">
-                      <div className="text-lg font-bold text-forest">${roi.costPerHour}</div>
-                      <div className="text-xs text-gray-600">Cost/Hour</div>
-                    </div>
-                    <div className="text-center p-3 bg-amber/10 rounded-lg">
-                      <div className="text-lg font-bold text-amber">${roi.annualDepreciation?.toLocaleString()}</div>
-                      <div className="text-xs text-gray-600">Annual Depreciation</div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className={`text-lg font-bold ${roi.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {roi.roi}%
-                      </div>
-                      <div className="text-xs text-gray-600">ROI</div>
-                    </div>
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="text-lg font-bold text-gray-700">${roi.depreciationRate}%</div>
-                      <div className="text-xs text-gray-600">Depreciation Rate</div>
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t border-gray-200">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Purchase Price:</span>
-                      <span className="font-medium">${item.purchasePrice?.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Current Value:</span>
-                      <span className="font-medium">${item.currentValue?.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Maintenance Cost:</span>
-                      <span className="font-medium">${roi.totalMaintenanceCost?.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between text-sm font-medium">
-                      <span className="text-gray-900">Total Cost:</span>
-                      <span>${roi.totalCostOfOwnership?.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      <div className="mt-8 flex gap-4">
-        <Button 
-          onClick={() => handleExportData('csv')}
-          disabled={exportLoading}
-          className="flex-1 sm:flex-none"
-        >
-          <ApperIcon name="FileText" className="w-4 h-4 mr-2" />
-          Export CSV
-        </Button>
-        <Button 
-          variant="outline"
-          onClick={() => handleExportData('excel')}
-          disabled={exportLoading}
-          className="flex-1 sm:flex-none"
-        >
-          <ApperIcon name="FileSpreadsheet" className="w-4 h-4 mr-2" />
-          Export Excel
-        </Button>
-        <Button 
-          variant="outline"
-          onClick={() => handleExportData('pdf')}
-          disabled={exportLoading}
-          className="flex-1 sm:flex-none"
-        >
-          <ApperIcon name="FileText" className="w-4 h-4 mr-2" />
-          Export PDF
-        </Button>
-      </div>
-    </div>
   );
-
-  // Add ROI tab rendering in tab content section
-  const renderTabContent = () => {
-    if (activeTab === 'roi') {
-      return renderROITab();
-    }
-    // ... existing tab content rendering logic
-  };
 };
 
 export default Equipment;
