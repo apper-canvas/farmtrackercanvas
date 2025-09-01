@@ -1,0 +1,200 @@
+[
+  {
+    "Id": 1,
+    "name": "John Deere 8R 370",
+    "type": "Tractor",
+    "model": "8R 370",
+    "manufacturer": "John Deere",
+    "year": 2022,
+    "status": "Active",
+    "totalHours": 1247,
+    "lastMaintenanceHours": 1200,
+    "nextMaintenanceHours": 1500,
+    "maintenanceInterval": 300,
+    "lastMaintenance": "2024-01-15T10:00:00Z",
+    "nextMaintenance": "2024-04-15T10:00:00Z",
+    "location": "North Field",
+    "fuelCapacity": 450,
+    "totalFuel": 3240,
+    "purchasePrice": 485000,
+    "currentValue": 425000,
+    "image": "https://images.unsplash.com/photo-1574946516217-7af76e2de68a?w=400&h=300&fit=crop&crop=center",
+    "lastUsed": "2024-01-28T14:30:00Z",
+    "usageLogs": [
+      {
+        "id": 1,
+        "date": "2024-01-28T14:30:00Z",
+        "hours": 8.5,
+        "fuelUsed": 85,
+        "operator": "Mike Johnson",
+        "notes": "Plowing south field, no issues",
+        "maintenancePerformed": false
+      }
+    ]
+  },
+  {
+    "Id": 2,
+    "name": "Case IH Axial-Flow 9250",
+    "type": "Combine Harvester",
+    "model": "Axial-Flow 9250",
+    "manufacturer": "Case IH",
+    "year": 2021,
+    "status": "Maintenance Due",
+    "totalHours": 892,
+    "lastMaintenanceHours": 600,
+    "nextMaintenanceHours": 900,
+    "maintenanceInterval": 300,
+    "lastMaintenance": "2023-11-20T09:00:00Z",
+    "nextMaintenance": "2024-02-01T09:00:00Z",
+    "location": "Equipment Barn",
+    "fuelCapacity": 1135,
+    "totalFuel": 8920,
+    "purchasePrice": 785000,
+    "currentValue": 680000,
+    "image": "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=400&h=300&fit=crop&crop=center",
+    "lastUsed": "2024-01-25T16:00:00Z",
+    "usageLogs": [
+      {
+        "id": 2,
+        "date": "2024-01-25T16:00:00Z",
+        "hours": 12,
+        "fuelUsed": 145,
+        "operator": "Sarah Wilson",
+        "notes": "Harvesting corn, header needs attention",
+        "maintenancePerformed": false
+      }
+    ]
+  },
+  {
+    "Id": 3,
+    "name": "New Holland T8.435",
+    "type": "Tractor",
+    "model": "T8.435",
+    "manufacturer": "New Holland",
+    "year": 2023,
+    "status": "Active",
+    "totalHours": 456,
+    "lastMaintenanceHours": 250,
+    "nextMaintenanceHours": 750,
+    "maintenanceInterval": 500,
+    "lastMaintenance": "2023-12-10T08:00:00Z",
+    "nextMaintenance": "2024-06-10T08:00:00Z",
+    "location": "West Field",
+    "fuelCapacity": 680,
+    "totalFuel": 1824,
+    "purchasePrice": 520000,
+    "currentValue": 495000,
+    "image": "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400&h=300&fit=crop&crop=center",
+    "lastUsed": "2024-01-27T11:15:00Z",
+    "usageLogs": [
+      {
+        "id": 3,
+        "date": "2024-01-27T11:15:00Z",
+        "hours": 6,
+        "fuelUsed": 48,
+        "operator": "Tom Anderson",
+        "notes": "Cultivating, smooth operation",
+        "maintenancePerformed": false
+      }
+    ]
+  },
+  {
+    "Id": 4,
+    "name": "Kubota M7-172",
+    "type": "Utility Tractor",
+    "model": "M7-172",
+    "manufacturer": "Kubota",
+    "year": 2022,
+    "status": "In Service",
+    "totalHours": 789,
+    "lastMaintenanceHours": 750,
+    "nextMaintenanceHours": 1000,
+    "maintenanceInterval": 250,
+    "lastMaintenance": "2024-01-20T13:00:00Z",
+    "nextMaintenance": "2024-04-20T13:00:00Z",
+    "location": "Maintenance Shop",
+    "fuelCapacity": 300,
+    "totalFuel": 2367,
+    "purchasePrice": 185000,
+    "currentValue": 165000,
+    "image": "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400&h=300&fit=crop&crop=center",
+    "lastUsed": "2024-01-26T09:45:00Z",
+    "usageLogs": [
+      {
+        "id": 4,
+        "date": "2024-01-26T09:45:00Z",
+        "hours": 4,
+        "fuelUsed": 32,
+        "operator": "Mike Johnson",
+        "notes": "Routine maintenance check",
+        "maintenancePerformed": true
+      }
+    ]
+  },
+  {
+    "Id": 5,
+    "name": "Fendt 1050 Vario",
+    "type": "Tractor",
+    "model": "1050 Vario",
+    "manufacturer": "Fendt",
+    "year": 2021,
+    "status": "Active",
+    "totalHours": 1567,
+    "lastMaintenanceHours": 1500,
+    "nextMaintenanceHours": 1750,
+    "maintenanceInterval": 250,
+    "lastMaintenance": "2024-01-10T07:30:00Z",
+    "nextMaintenance": "2024-03-10T07:30:00Z",
+    "location": "East Field",
+    "fuelCapacity": 900,
+    "totalFuel": 14103,
+    "purchasePrice": 625000,
+    "currentValue": 545000,
+    "image": "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?w=400&h=300&fit=crop&crop=center",
+    "lastUsed": "2024-01-29T13:20:00Z",
+    "usageLogs": [
+      {
+        "id": 5,
+        "date": "2024-01-29T13:20:00Z",
+        "hours": 10,
+        "fuelUsed": 95,
+        "operator": "Sarah Wilson",
+        "notes": "Heavy tillage work, excellent performance",
+        "maintenancePerformed": false
+      }
+    ]
+  },
+  {
+    "Id": 6,
+    "name": "Claas Lexion 8900",
+    "type": "Combine Harvester",
+    "model": "Lexion 8900",
+    "manufacturer": "Claas",
+    "year": 2023,
+    "status": "Active",
+    "totalHours": 234,
+    "lastMaintenanceHours": 100,
+    "nextMaintenanceHours": 500,
+    "maintenanceInterval": 400,
+    "lastMaintenance": "2023-10-15T14:00:00Z",
+    "nextMaintenance": "2024-08-15T14:00:00Z",
+    "location": "Storage Facility",
+    "fuelCapacity": 1200,
+    "totalFuel": 1872,
+    "purchasePrice": 890000,
+    "currentValue": 850000,
+    "image": "https://images.unsplash.com/photo-1574946516217-7af76e2de68a?w=400&h=300&fit=crop&crop=center",
+    "lastUsed": "2024-01-24T10:30:00Z",
+    "usageLogs": [
+      {
+        "id": 6,
+        "date": "2024-01-24T10:30:00Z",
+        "hours": 3,
+        "fuelUsed": 24,
+        "operator": "Tom Anderson",
+        "notes": "Test run after winter storage",
+        "maintenancePerformed": false
+      }
+    ]
+  }
+]
