@@ -28,8 +28,10 @@ class EquipmentService {
           {"field": {"Name": "location_c"}},
           {"field": {"Name": "fuel_capacity_c"}},
           {"field": {"Name": "total_fuel_c"}},
-          {"field": {"Name": "purchase_price_c"}},
+{"field": {"Name": "purchase_price_c"}},
           {"field": {"Name": "current_value_c"}},
+          {"field": {"Name": "serial_number_c"}},
+          {"field": {"Name": "year_purchased_c"}},
           {"field": {"Name": "image_c"}},
           {"field": {"Name": "last_used_c"}},
           {"field": {"Name": "usage_logs_c"}},
@@ -62,8 +64,10 @@ class EquipmentService {
         location: equipment.location_c,
         fuelCapacity: equipment.fuel_capacity_c || 0,
         totalFuel: equipment.total_fuel_c || 0,
-        purchasePrice: equipment.purchase_price_c || 0,
+purchasePrice: equipment.purchase_price_c || 0,
         currentValue: equipment.current_value_c || 0,
+        serialNumber: equipment.serial_number_c || 'N/A',
+        yearPurchased: equipment.year_purchased_c || equipment.year_c,
         image: equipment.image_c,
         lastUsed: equipment.last_used_c,
         usageLogs: equipment.usage_logs_c ? JSON.parse(equipment.usage_logs_c) : [],
@@ -97,8 +101,10 @@ class EquipmentService {
           {"field": {"Name": "total_fuel_c"}},
           {"field": {"Name": "purchase_price_c"}},
           {"field": {"Name": "current_value_c"}},
-          {"field": {"Name": "image_c"}},
+{"field": {"Name": "image_c"}},
           {"field": {"Name": "last_used_c"}},
+          {"field": {"Name": "serial_number_c"}},
+          {"field": {"Name": "year_purchased_c"}},
           {"field": {"Name": "usage_logs_c"}},
           {"field": {"Name": "maintenance_history_c"}}
         ]
@@ -134,8 +140,10 @@ class EquipmentService {
         location: equipment.location_c,
         fuelCapacity: equipment.fuel_capacity_c || 0,
         totalFuel: equipment.total_fuel_c || 0,
-        purchasePrice: equipment.purchase_price_c || 0,
+purchasePrice: equipment.purchase_price_c || 0,
         currentValue: equipment.current_value_c || 0,
+        serialNumber: equipment.serial_number_c || 'N/A',
+        yearPurchased: equipment.year_purchased_c || equipment.year_c,
         image: equipment.image_c,
         lastUsed: equipment.last_used_c,
         usageLogs: equipment.usage_logs_c ? JSON.parse(equipment.usage_logs_c) : [],
@@ -167,8 +175,10 @@ class EquipmentService {
           fuel_capacity_c: equipmentData.fuelCapacity || 0,
           total_fuel_c: 0,
           purchase_price_c: equipmentData.purchasePrice || 0,
-          current_value_c: equipmentData.currentValue || 0,
+current_value_c: equipmentData.currentValue || 0,
           image_c: equipmentData.image,
+          serial_number_c: equipmentData.serialNumber,
+          year_purchased_c: equipmentData.yearPurchased || equipmentData.year,
           last_used_c: equipmentData.lastUsed,
           usage_logs_c: JSON.stringify([]),
           maintenance_history_c: JSON.stringify([])
@@ -210,8 +220,10 @@ class EquipmentService {
           location: newEquipment.location_c,
           fuelCapacity: newEquipment.fuel_capacity_c || 0,
           totalFuel: newEquipment.total_fuel_c || 0,
-          purchasePrice: newEquipment.purchase_price_c || 0,
+purchasePrice: newEquipment.purchase_price_c || 0,
           currentValue: newEquipment.current_value_c || 0,
+          serialNumber: newEquipment.serial_number_c || 'N/A',
+          yearPurchased: newEquipment.year_purchased_c || newEquipment.year_c,
           image: newEquipment.image_c,
           lastUsed: newEquipment.last_used_c,
           usageLogs: [],
@@ -249,8 +261,10 @@ class EquipmentService {
       if (data.fuelCapacity !== undefined) updateData.fuel_capacity_c = data.fuelCapacity;
       if (data.totalFuel !== undefined) updateData.total_fuel_c = data.totalFuel;
       if (data.purchasePrice !== undefined) updateData.purchase_price_c = data.purchasePrice;
-      if (data.currentValue !== undefined) updateData.current_value_c = data.currentValue;
+if (data.currentValue !== undefined) updateData.current_value_c = data.currentValue;
       if (data.image !== undefined) updateData.image_c = data.image;
+      if (data.serialNumber !== undefined) updateData.serial_number_c = data.serialNumber;
+      if (data.yearPurchased !== undefined) updateData.year_purchased_c = data.yearPurchased;
       if (data.lastUsed !== undefined) updateData.last_used_c = data.lastUsed;
       if (data.usageLogs !== undefined) updateData.usage_logs_c = JSON.stringify(data.usageLogs);
       if (data.maintenanceHistory !== undefined) updateData.maintenance_history_c = JSON.stringify(data.maintenanceHistory);
@@ -292,8 +306,10 @@ class EquipmentService {
           lastMaintenance: updatedEquipment.last_maintenance_c,
           nextMaintenance: updatedEquipment.next_maintenance_c,
           location: updatedEquipment.location_c,
-          fuelCapacity: updatedEquipment.fuel_capacity_c || 0,
+fuelCapacity: updatedEquipment.fuel_capacity_c || 0,
           totalFuel: updatedEquipment.total_fuel_c || 0,
+          serialNumber: updatedEquipment.serial_number_c || 'N/A',
+          yearPurchased: updatedEquipment.year_purchased_c || updatedEquipment.year_c,
           purchasePrice: updatedEquipment.purchase_price_c || 0,
           currentValue: updatedEquipment.current_value_c || 0,
           image: updatedEquipment.image_c,
@@ -517,6 +533,179 @@ class EquipmentService {
       console.error(`Error updating maintenance record ${id}:`, error);
       throw new Error('Maintenance record not found');
     }
+}
+
+  // ROI Calculation Methods
+  calculateROI(equipment) {
+    try {
+      const purchasePrice = equipment.purchasePrice || 0;
+      const currentValue = equipment.currentValue || 0;
+      const totalHours = equipment.totalHours || 0;
+      const currentYear = new Date().getFullYear();
+      const purchaseYear = equipment.yearPurchased || equipment.year || currentYear;
+      const yearsOwned = Math.max(currentYear - purchaseYear, 1);
+
+      // Calculate total maintenance costs
+      const totalMaintenanceCost = (equipment.maintenanceHistory || [])
+        .reduce((sum, record) => sum + (record.actualCost || record.estimatedCost || 0), 0);
+
+      // Cost per hour calculation
+      const totalCost = purchasePrice - currentValue + totalMaintenanceCost;
+      const costPerHour = totalHours > 0 ? totalCost / totalHours : 0;
+
+      // Annual depreciation
+      const totalDepreciation = purchasePrice - currentValue;
+      const annualDepreciation = totalDepreciation / yearsOwned;
+      const depreciationRate = purchasePrice > 0 ? (totalDepreciation / purchasePrice) * 100 : 0;
+
+      // ROI Percentage (negative indicates depreciation)
+      const roi = purchasePrice > 0 ? ((currentValue - purchasePrice) / purchasePrice) * 100 : 0;
+
+      // Additional metrics
+      const maintenanceCostPerHour = totalHours > 0 ? totalMaintenanceCost / totalHours : 0;
+      const totalCostOfOwnership = purchasePrice + totalMaintenanceCost;
+
+      return {
+        costPerHour: Math.round(costPerHour * 100) / 100,
+        annualDepreciation: Math.round(annualDepreciation * 100) / 100,
+        depreciationRate: Math.round(depreciationRate * 100) / 100,
+        roi: Math.round(roi * 100) / 100,
+        totalMaintenanceCost: Math.round(totalMaintenanceCost * 100) / 100,
+        maintenanceCostPerHour: Math.round(maintenanceCostPerHour * 100) / 100,
+        totalCostOfOwnership: Math.round(totalCostOfOwnership * 100) / 100,
+        yearsOwned,
+        totalDepreciation: Math.round(totalDepreciation * 100) / 100
+      };
+    } catch (error) {
+      console.error('Error calculating ROI:', error);
+      return {
+        costPerHour: 0,
+        annualDepreciation: 0,
+        depreciationRate: 0,
+        roi: 0,
+        totalMaintenanceCost: 0,
+        maintenanceCostPerHour: 0,
+        totalCostOfOwnership: 0,
+        yearsOwned: 1,
+        totalDepreciation: 0
+      };
+    }
+  }
+
+  // Export functionality
+  async exportROIData(format = 'csv', dateRange = null) {
+    try {
+      const equipment = await this.getAll();
+      const roiData = equipment.map(item => {
+        const roi = this.calculateROI(item);
+        return {
+          name: item.name,
+          type: item.type,
+          manufacturer: item.manufacturer,
+          model: item.model,
+          year: item.year,
+          serialNumber: item.serialNumber,
+          purchasePrice: item.purchasePrice,
+          currentValue: item.currentValue,
+          totalHours: item.totalHours,
+          costPerHour: roi.costPerHour,
+          annualDepreciation: roi.annualDepreciation,
+          depreciationRate: roi.depreciationRate,
+          roi: roi.roi,
+          totalMaintenanceCost: roi.totalMaintenanceCost,
+          maintenanceCostPerHour: roi.maintenanceCostPerHour,
+          totalCostOfOwnership: roi.totalCostOfOwnership,
+          yearsOwned: roi.yearsOwned,
+          totalDepreciation: roi.totalDepreciation
+        };
+      });
+
+      if (format === 'csv') {
+        return this.generateCSV(roiData);
+      } else if (format === 'excel') {
+        return this.generateExcel(roiData);
+      } else if (format === 'pdf') {
+        return this.generatePDF(roiData);
+      }
+
+      return roiData;
+    } catch (error) {
+      console.error('Error exporting ROI data:', error);
+      throw new Error('Failed to export ROI data');
+    }
+  }
+
+  generateCSV(data) {
+    const headers = [
+      'Equipment Name', 'Type', 'Manufacturer', 'Model', 'Year', 'Serial Number',
+      'Purchase Price', 'Current Value', 'Total Hours', 'Cost Per Hour',
+      'Annual Depreciation', 'Depreciation Rate (%)', 'ROI (%)', 
+      'Total Maintenance Cost', 'Maintenance Cost Per Hour', 'Total Cost of Ownership',
+      'Years Owned', 'Total Depreciation'
+    ];
+
+    const csvContent = [
+      headers.join(','),
+      ...data.map(item => [
+        `"${item.name}"`,
+        `"${item.type}"`,
+        `"${item.manufacturer}"`,
+        `"${item.model}"`,
+        item.year,
+        `"${item.serialNumber}"`,
+        item.purchasePrice,
+        item.currentValue,
+        item.totalHours,
+        item.costPerHour,
+        item.annualDepreciation,
+        item.depreciationRate,
+        item.roi,
+        item.totalMaintenanceCost,
+        item.maintenanceCostPerHour,
+        item.totalCostOfOwnership,
+        item.yearsOwned,
+        item.totalDepreciation
+      ].join(','))
+    ].join('\n');
+
+    return csvContent;
+  }
+
+  generateExcel(data) {
+    // For web implementation, return CSV format with Excel MIME type
+    // In a full implementation, you would use a library like SheetJS
+    const csvContent = this.generateCSV(data);
+    return {
+      content: csvContent,
+      mimeType: 'application/vnd.ms-excel',
+      filename: `equipment_roi_${new Date().toISOString().split('T')[0]}.xls`
+    };
+  }
+
+  generatePDF(data) {
+    // For web implementation, return formatted text
+    // In a full implementation, you would use a library like jsPDF
+    const content = `
+EQUIPMENT ROI ANALYSIS REPORT
+Generated: ${new Date().toLocaleDateString()}
+
+${data.map(item => `
+${item.name} (${item.type})
+- Manufacturer: ${item.manufacturer} ${item.model}
+- Purchase Price: $${item.purchasePrice.toLocaleString()}
+- Current Value: $${item.currentValue.toLocaleString()}
+- Cost Per Hour: $${item.costPerHour}
+- Annual Depreciation: $${item.annualDepreciation.toLocaleString()}
+- ROI: ${item.roi}%
+- Years Owned: ${item.yearsOwned}
+`).join('')}
+    `;
+
+    return {
+      content,
+      mimeType: 'application/pdf',
+      filename: `equipment_roi_report_${new Date().toISOString().split('T')[0]}.pdf`
+    };
   }
 }
 

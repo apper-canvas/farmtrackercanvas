@@ -33,8 +33,11 @@ const [equipment, setEquipment] = useState([]);
     scheduledDate: '',
     estimatedCost: '',
     notes: '',
-    priority: 'medium'
+priority: 'medium'
   });
+  const [showROIModal, setShowROIModal] = useState(false);
+  const [roiData, setRoiData] = useState(null);
+  const [exportLoading, setExportLoading] = useState(false);
   useEffect(() => {
     loadEquipment();
   }, []);
@@ -199,8 +202,16 @@ const handleLogUsage = (equipment) => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 font-display gradient-text">Equipment Management</h1>
           <p className="text-gray-600 mt-1">Track machinery status and maintenance schedules</p>
-        </div>
-<div className="mt-4 md:mt-0 flex gap-2">
+</div>
+        <div className="mt-4 md:mt-0 flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={async () => await handleExportData('csv')}
+            disabled={exportLoading}
+          >
+            <ApperIcon name="Download" className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
           <Button variant="outline" onClick={loadEquipment}>
             <ApperIcon name="RefreshCw" className="w-4 h-4 mr-2" />
             Refresh
@@ -214,8 +225,9 @@ const handleLogUsage = (equipment) => {
           <nav className="flex space-x-8 px-6">
             {[
               { id: 'list', label: 'Equipment List', icon: 'List' },
-              { id: 'calendar', label: 'Maintenance Calendar', icon: 'Calendar' },
-              { id: 'history', label: 'Maintenance History', icon: 'History' }
+{ id: 'calendar', label: 'Maintenance Calendar', icon: 'Calendar' },
+              { id: 'history', label: 'Maintenance History', icon: 'History' },
+              { id: 'roi', label: 'ROI Analysis', icon: 'TrendingUp' }
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -367,7 +379,11 @@ const handleLogUsage = (equipment) => {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Serial Number:</span>
-                      <span>{selectedEquipment.serialNumber}</span>
+<span>{selectedEquipment.serialNumber || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Year Purchased:</span>
+                      <span>{selectedEquipment.yearPurchased || selectedEquipment.year}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Year:</span>
@@ -408,6 +424,14 @@ const handleLogUsage = (equipment) => {
                     <div className="flex justify-between">
                       <span className="text-gray-600">Current Value:</span>
                       <span>${selectedEquipment.currentValue?.toLocaleString()}</span>
+                    </div>
+<div className="flex justify-between">
+                      <span className="text-gray-600">Cost Per Hour:</span>
+                      <span>${equipmentService.calculateROI(selectedEquipment).costPerHour}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Annual Depreciation:</span>
+                      <span>${equipmentService.calculateROI(selectedEquipment).annualDepreciation?.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
@@ -914,7 +938,42 @@ const handleLogUsage = (equipment) => {
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-600 mb-2">Location</h4>
-                    <p className="text-2xl font-bold text-gray-900">{selectedEquipment.location}</p>
+<p className="text-2xl font-bold text-gray-900">{selectedEquipment.location}</p>
+                  </div>
+                </div>
+                
+                {/* ROI Analysis Section */}
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                    <ApperIcon name="TrendingUp" className="w-5 h-5 mr-2" />
+                    Financial Analysis
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {(() => {
+                      const roi = equipmentService.calculateROI(selectedEquipment);
+                      return (
+                        <>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-forest">${roi.costPerHour}</div>
+                            <div className="text-xs text-gray-600">Cost/Hour</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-amber">${roi.annualDepreciation?.toLocaleString()}</div>
+                            <div className="text-xs text-gray-600">Annual Depreciation</div>
+                          </div>
+                          <div className="text-center">
+                            <div className={`text-lg font-bold ${roi.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {roi.roi}%
+                            </div>
+                            <div className="text-xs text-gray-600">ROI</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-gray-700">${roi.totalCostOfOwnership?.toLocaleString()}</div>
+                            <div className="text-xs text-gray-600">Total Cost</div>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
 
@@ -1059,7 +1118,172 @@ const handleLogUsage = (equipment) => {
         </div>
       )}
     </div>
+);
+
+  // ROI Analysis functions
+  const handleExportData = async (format) => {
+    try {
+      setExportLoading(true);
+      const exportData = await equipmentService.exportROIData(format);
+      
+      let content, mimeType, filename;
+      
+      if (format === 'csv') {
+        content = exportData;
+        mimeType = 'text/csv';
+        filename = `equipment_roi_${new Date().toISOString().split('T')[0]}.csv`;
+      } else if (format === 'excel') {
+        content = exportData.content;
+        mimeType = exportData.mimeType;
+        filename = exportData.filename;
+      } else if (format === 'pdf') {
+        content = exportData.content;
+        mimeType = 'text/plain';
+        filename = exportData.filename;
+      }
+      
+      // Create download link
+      const blob = new Blob([content], { type: mimeType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success(`ROI data exported successfully as ${format.toUpperCase()}`);
+    } catch (error) {
+      console.error(`Error exporting ${format}:`, error);
+      toast.error(`Failed to export ${format.toUpperCase()} data`);
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  // Add ROI tab content after history tab
+  const renderROITab = () => (
+    <div className="p-6">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">ROI Analysis</h2>
+        <p className="text-gray-600">Financial analysis and cost calculations for tax reporting</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {equipment.map((item) => {
+          const roi = equipmentService.calculateROI(item);
+          return (
+            <Card key={item.Id} className="border hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-forest/10 rounded-lg">
+                      <ApperIcon name={getEquipmentIcon(item.type)} className="w-6 h-6 text-forest" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{item.name}</h3>
+                      <p className="text-sm text-gray-600">{item.type}</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleExportData('csv')}
+                    disabled={exportLoading}
+                  >
+                    <ApperIcon name="Download" className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center p-3 bg-forest/5 rounded-lg">
+                      <div className="text-lg font-bold text-forest">${roi.costPerHour}</div>
+                      <div className="text-xs text-gray-600">Cost/Hour</div>
+                    </div>
+                    <div className="text-center p-3 bg-amber/10 rounded-lg">
+                      <div className="text-lg font-bold text-amber">${roi.annualDepreciation?.toLocaleString()}</div>
+                      <div className="text-xs text-gray-600">Annual Depreciation</div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className={`text-lg font-bold ${roi.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {roi.roi}%
+                      </div>
+                      <div className="text-xs text-gray-600">ROI</div>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-lg font-bold text-gray-700">${roi.depreciationRate}%</div>
+                      <div className="text-xs text-gray-600">Depreciation Rate</div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-gray-200">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Purchase Price:</span>
+                      <span className="font-medium">${item.purchasePrice?.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Current Value:</span>
+                      <span className="font-medium">${item.currentValue?.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Maintenance Cost:</span>
+                      <span className="font-medium">${roi.totalMaintenanceCost?.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm font-medium">
+                      <span className="text-gray-900">Total Cost:</span>
+                      <span>${roi.totalCostOfOwnership?.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      <div className="mt-8 flex gap-4">
+        <Button 
+          onClick={() => handleExportData('csv')}
+          disabled={exportLoading}
+          className="flex-1 sm:flex-none"
+        >
+          <ApperIcon name="FileText" className="w-4 h-4 mr-2" />
+          Export CSV
+        </Button>
+        <Button 
+          variant="outline"
+          onClick={() => handleExportData('excel')}
+          disabled={exportLoading}
+          className="flex-1 sm:flex-none"
+        >
+          <ApperIcon name="FileSpreadsheet" className="w-4 h-4 mr-2" />
+          Export Excel
+        </Button>
+        <Button 
+          variant="outline"
+          onClick={() => handleExportData('pdf')}
+          disabled={exportLoading}
+          className="flex-1 sm:flex-none"
+        >
+          <ApperIcon name="FileText" className="w-4 h-4 mr-2" />
+          Export PDF
+        </Button>
+      </div>
+    </div>
   );
+
+  // Add ROI tab rendering in tab content section
+  const renderTabContent = () => {
+    if (activeTab === 'roi') {
+      return renderROITab();
+    }
+    // ... existing tab content rendering logic
+  };
 };
 
 export default Equipment;
