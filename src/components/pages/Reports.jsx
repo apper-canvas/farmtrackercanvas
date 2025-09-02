@@ -111,7 +111,7 @@ const Reports = () => {
 if (format === 'csv') {
         const blob = new Blob([exportData], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+const link = document.createElement('a');
         link.href = url;
         link.download = `${reportType}_report_${format(new Date(), 'yyyy-MM-dd')}.csv`;
         link.click();
@@ -229,11 +229,11 @@ if (format === 'csv') {
           <MetricCard
             title="Net Profit"
             value={reports.performanceMetrics.summary?.netProfit || "$0"}
-            icon="TrendingUp"
+icon="TrendingUp"
             color="blue"
             trend={reports.performanceMetrics.summary?.profitTrend}
             trendValue={reports.performanceMetrics.summary?.profitChange}
-description="Revenue - Costs"
+            description="Revenue - Costs"
           />
         </div>
       )}
@@ -500,15 +500,15 @@ description="Revenue - Costs"
               </div>
             </CardContent>
           </Card>
-        )}
+)}
       </div>
-</div>
 
       {/* Detailed Report Sections */}
       {reports.yieldAnalysis && (selectedReportType === "all" || selectedReportType === "yield") && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
-<CardHeader>
+            <CardHeader>
               <h3 className="text-lg font-semibold text-gray-900 font-display">Top Performing Fields</h3>
             </CardHeader>
             <CardContent>
@@ -555,12 +555,11 @@ description="Revenue - Costs"
                     </div>
                   </div>
                 ))}
-              </div>
+</div>
             </CardContent>
-</Card>
+          </Card>
         </div>
       )}
-
       {/* Export All Reports */}
       <Card className="bg-gradient-to-r from-forest/5 to-fresh/5">
         <CardContent className="p-8 text-center">
@@ -583,9 +582,9 @@ description="Revenue - Costs"
               icon="File"
               onClick={() => handleExport('all', 'pdf')}
               loading={exportingFormat === 'all-pdf'}
-            >
+>
               Export PDF
-</Button>
+            </Button>
           </div>
         </CardContent>
       </Card>
