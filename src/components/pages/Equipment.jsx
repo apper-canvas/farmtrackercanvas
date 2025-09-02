@@ -34,10 +34,90 @@ const [equipment, setEquipment] = useState([]);
     estimatedCost: '',
     notes: '',
 priority: 'medium'
+});
+  
+  // Add Equipment Modal State
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addFormData, setAddFormData] = useState({
+    name: '',
+    type: 'Tractor',
+    model: '',
+    manufacturer: '',
+    year: new Date().getFullYear(),
+    location: '',
+    fuelCapacity: '',
+    purchasePrice: '',
+    currentValue: '',
+    serialNumber: '',
+    maintenanceInterval: 300,
+    nextMaintenanceHours: '',
+    image: ''
   });
+  const [addLoading, setAddLoading] = useState(false);
   const [showROIModal, setShowROIModal] = useState(false);
   const [roiData, setRoiData] = useState(null);
-  const [exportLoading, setExportLoading] = useState(false);
+const [exportLoading, setExportLoading] = useState(false);
+  
+  // Handle Add Equipment
+  const handleAddEquipment = async (e) => {
+    e.preventDefault();
+    setAddLoading(true);
+    
+    try {
+      // Validate required fields
+      if (!addFormData.name || !addFormData.model || !addFormData.manufacturer) {
+        toast.error('Please fill in all required fields');
+        return;
+      }
+      
+      // Prepare data for service
+      const equipmentData = {
+        name: addFormData.name,
+        type: addFormData.type,
+        model: addFormData.model,
+        manufacturer: addFormData.manufacturer,
+        year: parseInt(addFormData.year),
+        location: addFormData.location,
+        fuelCapacity: parseFloat(addFormData.fuelCapacity) || 0,
+        purchasePrice: parseFloat(addFormData.purchasePrice) || 0,
+        currentValue: parseFloat(addFormData.currentValue) || 0,
+        serialNumber: addFormData.serialNumber,
+        maintenanceInterval: parseInt(addFormData.maintenanceInterval) || 300,
+        nextMaintenanceHours: parseInt(addFormData.nextMaintenanceHours) || 0,
+        image: addFormData.image
+      };
+      
+      await equipmentService.create(equipmentData);
+      
+      toast.success('Equipment added successfully');
+      setShowAddModal(false);
+      
+      // Reset form
+      setAddFormData({
+        name: '',
+        type: 'Tractor',
+        model: '',
+        manufacturer: '',
+        year: new Date().getFullYear(),
+        location: '',
+        fuelCapacity: '',
+        purchasePrice: '',
+        currentValue: '',
+        serialNumber: '',
+        maintenanceInterval: 300,
+        nextMaintenanceHours: '',
+        image: ''
+      });
+      
+      // Reload equipment list
+      loadEquipment();
+    } catch (error) {
+      console.error('Error adding equipment:', error);
+      toast.error('Failed to add equipment');
+    } finally {
+      setAddLoading(false);
+    }
+  };
   useEffect(() => {
     loadEquipment();
   }, []);
@@ -59,6 +139,14 @@ priority: 'medium'
   const handleViewDetails = (equipment) => {
     setSelectedEquipment(equipment);
     setShowDetailModal(true);
+  };
+
+const handleAddFormChange = (e) => {
+    const { name, value } = e.target;
+    setAddFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
 const handleLogUsage = (equipment) => {
@@ -132,6 +220,22 @@ const handleLogUsage = (equipment) => {
       toast.error('Failed to log usage');
     }
   };
+
+// Equipment type options for form
+  const equipmentTypes = [
+    'Tractor',
+    'Combine Harvester',
+    'Utility Tractor',
+    'Planter',
+    'Sprayer',
+    'Cultivator',
+    'Disc Harrow',
+    'Mower',
+    'Baler',
+    'Spreader',
+    'Trailer',
+    'Other'
+  ];
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -246,6 +350,13 @@ const handleLogUsage = (equipment) => {
           <p className="text-gray-600 mt-1">Track machinery status and maintenance schedules</p>
 </div>
         <div className="mt-4 md:mt-0 flex gap-2">
+<Button 
+            variant="primary" 
+            onClick={() => setShowAddModal(true)}
+          >
+            <ApperIcon name="Plus" className="w-4 h-4 mr-2" />
+            Add Equipment
+          </Button>
           <Button 
             variant="outline" 
             onClick={async () => await handleExportData('csv')}
@@ -1268,6 +1379,243 @@ const handleLogUsage = (equipment) => {
                   className="flex-1"
                 >
                   Log Usage
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+{/* Add Equipment Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h2 className="text-xl font-semibold text-gray-900">Add New Equipment</h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <ApperIcon name="X" className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddEquipment} className="p-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Equipment Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Equipment Name *
+                  </label>
+                  <Input
+                    type="text"
+                    name="name"
+                    value={addFormData.name}
+                    onChange={handleAddFormChange}
+                    placeholder="e.g., John Deere 8R 370"
+                    required
+                  />
+                </div>
+
+                {/* Equipment Type */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Equipment Type *
+                  </label>
+                  <Select
+                    name="type"
+                    value={addFormData.type}
+                    onChange={handleAddFormChange}
+                    required
+                  >
+                    {equipmentTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </Select>
+                </div>
+
+                {/* Model */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Model *
+                  </label>
+                  <Input
+                    type="text"
+                    name="model"
+                    value={addFormData.model}
+                    onChange={handleAddFormChange}
+                    placeholder="e.g., 8R 370"
+                    required
+                  />
+                </div>
+
+                {/* Manufacturer */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Manufacturer *
+                  </label>
+                  <Input
+                    type="text"
+                    name="manufacturer"
+                    value={addFormData.manufacturer}
+                    onChange={handleAddFormChange}
+                    placeholder="e.g., John Deere"
+                    required
+                  />
+                </div>
+
+                {/* Year */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Year
+                  </label>
+                  <Input
+                    type="number"
+                    name="year"
+                    value={addFormData.year}
+                    onChange={handleAddFormChange}
+                    min="1900"
+                    max={new Date().getFullYear() + 1}
+                  />
+                </div>
+
+                {/* Location */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Location
+                  </label>
+                  <Input
+                    type="text"
+                    name="location"
+                    value={addFormData.location}
+                    onChange={handleAddFormChange}
+                    placeholder="e.g., North Field, Equipment Barn"
+                  />
+                </div>
+
+                {/* Fuel Capacity */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Fuel Capacity (L)
+                  </label>
+                  <Input
+                    type="number"
+                    name="fuelCapacity"
+                    value={addFormData.fuelCapacity}
+                    onChange={handleAddFormChange}
+                    min="0"
+                    step="0.1"
+                    placeholder="e.g., 450"
+                  />
+                </div>
+
+                {/* Purchase Price */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Purchase Price ($)
+                  </label>
+                  <Input
+                    type="number"
+                    name="purchasePrice"
+                    value={addFormData.purchasePrice}
+                    onChange={handleAddFormChange}
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g., 485000"
+                  />
+                </div>
+
+                {/* Current Value */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Current Value ($)
+                  </label>
+                  <Input
+                    type="number"
+                    name="currentValue"
+                    value={addFormData.currentValue}
+                    onChange={handleAddFormChange}
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g., 425000"
+                  />
+                </div>
+
+                {/* Serial Number */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Serial Number
+                  </label>
+                  <Input
+                    type="text"
+                    name="serialNumber"
+                    value={addFormData.serialNumber}
+                    onChange={handleAddFormChange}
+                    placeholder="e.g., 1RW8R370PCNK12345"
+                  />
+                </div>
+
+                {/* Maintenance Interval */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Maintenance Interval (hours)
+                  </label>
+                  <Input
+                    type="number"
+                    name="maintenanceInterval"
+                    value={addFormData.maintenanceInterval}
+                    onChange={handleAddFormChange}
+                    min="1"
+                    placeholder="e.g., 300"
+                  />
+                </div>
+
+                {/* Next Maintenance Hours */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Next Maintenance Hours
+                  </label>
+                  <Input
+                    type="number"
+                    name="nextMaintenanceHours"
+                    value={addFormData.nextMaintenanceHours}
+                    onChange={handleAddFormChange}
+                    min="0"
+                    placeholder="e.g., 1500"
+                  />
+                </div>
+              </div>
+
+              {/* Image URL */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Image URL
+                </label>
+                <Input
+                  type="url"
+                  name="image"
+                  value={addFormData.image}
+                  onChange={handleAddFormChange}
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex justify-end gap-4 pt-4 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowAddModal(false)}
+                  disabled={addLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={addLoading}
+                  loading={addLoading}
+                >
+                  {addLoading ? 'Adding...' : 'Add Equipment'}
                 </Button>
               </div>
             </form>
