@@ -504,9 +504,8 @@ icon="TrendingUp"
       </div>
 
       {/* Detailed Report Sections */}
-      {reports.yieldAnalysis && (selectedReportType === "all" || selectedReportType === "yield") && (
+{reports.yieldAnalysis && (selectedReportType === "all" || selectedReportType === "yield") && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <h3 className="text-lg font-semibold text-gray-900 font-display">Top Performing Fields</h3>
