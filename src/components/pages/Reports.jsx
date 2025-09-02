@@ -108,14 +108,14 @@ const Reports = () => {
       
       const exportData = await reportsService.exportReport(reportType, format, startDate, endDate);
       
-      if (format === 'csv') {
+if (format === 'csv') {
         const blob = new Blob([exportData], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
-link.href = url;
+        const link = document.createElement('a');
+        link.href = url;
         link.download = `${reportType}_report_${format(new Date(), 'yyyy-MM-dd')}.csv`;
         link.click();
         window.URL.revokeObjectURL(url);
-      } else if (format === 'pdf') {
       } else if (format === 'pdf') {
         // Handle PDF export
         const blob = new Blob([exportData.content], { type: 'application/pdf' });
@@ -233,15 +233,15 @@ link.href = url;
             color="blue"
             trend={reports.performanceMetrics.summary?.profitTrend}
             trendValue={reports.performanceMetrics.summary?.profitChange}
-            description="Revenue - Costs"
+description="Revenue - Costs"
           />
-</div>
-      )}
-)}
+        </div>
       )}
 
       {/* Report Categories */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Yield Analysis */}
+        {(selectedReportType === "all" || selectedReportType === "yield") && reports.yieldAnalysis && (
           <Card className="card-hover" hover>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -508,8 +508,9 @@ link.href = url;
       {reports.yieldAnalysis && (selectedReportType === "all" || selectedReportType === "yield") && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
-            <CardHeader>
+<CardHeader>
               <h3 className="text-lg font-semibold text-gray-900 font-display">Top Performing Fields</h3>
+            </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {reports.yieldAnalysis.topFields?.map((field, index) => (
@@ -556,9 +557,8 @@ link.href = url;
                 ))}
               </div>
             </CardContent>
-          </Card>
+</Card>
         </div>
-</div>
       )}
 
       {/* Export All Reports */}
@@ -568,8 +568,9 @@ link.href = url;
           <h3 className="text-xl font-semibold text-gray-900 mb-2 font-display">Export Reports</h3>
           <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
             Download comprehensive reports in various formats for further analysis or sharing with stakeholders.
+          </p>
           <div className="flex justify-center space-x-4">
-            <Button 
+            <Button
               variant="outline" 
               icon="FileText"
               onClick={() => handleExport('all', 'csv')}
@@ -584,9 +585,9 @@ link.href = url;
               loading={exportingFormat === 'all-pdf'}
             >
               Export PDF
-            </Button>
+</Button>
           </div>
-</CardContent>
+        </CardContent>
       </Card>
     </div>
   );
