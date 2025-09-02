@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/atoms/Card";
-import reportsService from "@/services/api/reportsService";
 import { format, subDays, subMonths } from "date-fns";
 import { toast } from "react-toastify";
+import reportsService from "@/services/api/reportsService";
 import ApperIcon from "@/components/ApperIcon";
 import MetricCard from "@/components/molecules/MetricCard";
 import Error from "@/components/ui/Error";
@@ -111,11 +111,11 @@ const Reports = () => {
       if (format === 'csv') {
         const blob = new Blob([exportData], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-link.download = `${reportType}_report_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+link.href = url;
+        link.download = `${reportType}_report_${format(new Date(), 'yyyy-MM-dd')}.csv`;
         link.click();
         window.URL.revokeObjectURL(url);
+      } else if (format === 'pdf') {
       } else if (format === 'pdf') {
         // Handle PDF export
         const blob = new Blob([exportData.content], { type: 'application/pdf' });
@@ -235,13 +235,13 @@ link.download = `${reportType}_report_${format(new Date(), 'yyyy-MM-dd')}.csv`;
             trendValue={reports.performanceMetrics.summary?.profitChange}
             description="Revenue - Costs"
           />
-        </div>
+</div>
       )}
 )}
-{/* Report Categories */}
+      )}
+
+      {/* Report Categories */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Yield Analysis */}
-        {(selectedReportType === "all" || selectedReportType === "yield") && reports.yieldAnalysis && (
           <Card className="card-hover" hover>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -502,15 +502,14 @@ link.download = `${reportType}_report_${format(new Date(), 'yyyy-MM-dd')}.csv`;
           </Card>
         )}
       </div>
+</div>
 
-      {/* Sample Charts Preview */}
-{/* Detailed Report Sections */}
+      {/* Detailed Report Sections */}
       {reports.yieldAnalysis && (selectedReportType === "all" || selectedReportType === "yield") && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <h3 className="text-lg font-semibold text-gray-900 font-display">Top Performing Fields</h3>
-            </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {reports.yieldAnalysis.topFields?.map((field, index) => (
@@ -559,16 +558,16 @@ link.download = `${reportType}_report_${format(new Date(), 'yyyy-MM-dd')}.csv`;
             </CardContent>
           </Card>
         </div>
+</div>
       )}
 
-{/* Export All Reports */}
+      {/* Export All Reports */}
       <Card className="bg-gradient-to-r from-forest/5 to-fresh/5">
         <CardContent className="p-8 text-center">
           <ApperIcon name="Download" className="w-12 h-12 text-forest mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-900 mb-2 font-display">Export Reports</h3>
           <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
             Download comprehensive reports in various formats for further analysis or sharing with stakeholders.
-          </p>
           <div className="flex justify-center space-x-4">
             <Button 
               variant="outline" 
