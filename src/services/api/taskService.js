@@ -46,9 +46,13 @@ class TaskService {
         fieldName: task.field_id_c?.Name || 'Unknown Field',
         createdDate: task.created_date_c
       }));
-    } catch (error) {
+} catch (error) {
       console.error('Error fetching tasks:', error);
-      throw new Error('Failed to fetch tasks');
+      // Preserve original error for better debugging and user feedback
+      if (error.message === 'Network Error' || error.code === 'NETWORK_ERROR') {
+        throw error; // Pass through network errors with original context
+      }
+      throw new Error(`Failed to fetch tasks: ${error.message || 'Unknown error'}`);
     }
   }
 
@@ -95,8 +99,12 @@ class TaskService {
         createdDate: task.created_date_c
       };
     } catch (error) {
-      console.error(`Error fetching task ${id}:`, error);
-      throw new Error('Task not found');
+console.error(`Error fetching task ${id}:`, error);
+      // Preserve original error context
+      if (error.message === 'Network Error' || error.code === 'NETWORK_ERROR') {
+        throw error;
+      }
+      throw new Error(`Task not found: ${error.message || 'Unknown error'}`);
     }
   }
 
@@ -140,8 +148,12 @@ class TaskService {
         createdDate: task.created_date_c
       }));
     } catch (error) {
-      console.error(`Error fetching tasks for field ${fieldId}:`, error);
-      throw new Error('Failed to fetch field tasks');
+console.error(`Error fetching tasks for field ${fieldId}:`, error);
+      // Preserve network errors for proper handling
+      if (error.message === 'Network Error' || error.code === 'NETWORK_ERROR') {
+        throw error;
+      }
+      throw new Error(`Failed to fetch field tasks: ${error.message || 'Unknown error'}`);
     }
   }
 
@@ -185,8 +197,12 @@ class TaskService {
         createdDate: task.created_date_c
       }));
     } catch (error) {
-      console.error('Error fetching today\'s tasks:', error);
-      throw new Error('Failed to fetch today\'s tasks');
+console.error('Error fetching today\'s tasks:', error);
+      // Handle network errors specifically
+      if (error.message === 'Network Error' || error.code === 'NETWORK_ERROR') {
+        throw error;
+      }
+      throw new Error(`Failed to fetch today's tasks: ${error.message || 'Unknown error'}`);
     }
   }
 
@@ -233,8 +249,12 @@ class TaskService {
         createdDate: task.created_date_c
       }));
     } catch (error) {
-      console.error('Error fetching overdue tasks:', error);
-      throw new Error('Failed to fetch overdue tasks');
+console.error('Error fetching overdue tasks:', error);
+      // Preserve original error type and message
+      if (error.message === 'Network Error' || error.code === 'NETWORK_ERROR') {
+        throw error;
+      }
+      throw new Error(`Failed to fetch overdue tasks: ${error.message || 'Unknown error'}`);
     }
   }
 
@@ -286,9 +306,13 @@ class TaskService {
       }
       
       throw new Error('No results returned from create operation');
-    } catch (error) {
+} catch (error) {
       console.error('Error creating task:', error);
-      throw new Error('Failed to create task');
+      // Pass through network errors for proper UI handling
+      if (error.message === 'Network Error' || error.code === 'NETWORK_ERROR') {
+        throw error;
+      }
+      throw new Error(`Failed to create task: ${error.message || 'Unknown error'}`);
     }
   }
 
@@ -347,8 +371,12 @@ class TaskService {
       
       throw new Error('No results returned from update operation');
     } catch (error) {
-      console.error(`Error updating task ${id}:`, error);
-      throw new Error('Failed to update task');
+console.error(`Error updating task ${id}:`, error);
+      // Maintain error context for network issues
+      if (error.message === 'Network Error' || error.code === 'NETWORK_ERROR') {
+        throw error;
+      }
+      throw new Error(`Failed to update task: ${error.message || 'Unknown error'}`);
     }
   }
 
@@ -378,9 +406,13 @@ class TaskService {
       }
       
       return true;
-    } catch (error) {
+} catch (error) {
       console.error(`Error deleting task ${id}:`, error);
-      throw new Error('Failed to delete task');
+      // Handle network errors appropriately
+      if (error.message === 'Network Error' || error.code === 'NETWORK_ERROR') {
+        throw error;
+      }
+      throw new Error(`Failed to delete task: ${error.message || 'Unknown error'}`);
     }
   }
 
@@ -391,9 +423,13 @@ class TaskService {
       const newStatus = currentTask.status === 'completed' ? 'pending' : 'completed';
       
       return await this.update(id, { status: newStatus });
-    } catch (error) {
+} catch (error) {
       console.error(`Error toggling task completion ${id}:`, error);
-      throw new Error('Failed to update task status');
+      // Preserve network error details
+      if (error.message === 'Network Error' || error.code === 'NETWORK_ERROR') {
+        throw error;
+      }
+      throw new Error(`Failed to update task status: ${error.message || 'Unknown error'}`);
     }
   }
 }

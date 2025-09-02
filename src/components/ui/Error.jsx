@@ -8,12 +8,12 @@ const Error = ({ message = "Something went wrong", onRetry, type = "default" }) 
         return {
           icon: "WifiOff",
           title: "Connection Error",
-          description: "Unable to connect to server. Please check your internet connection.",
+          description: "Unable to connect to server. Please check your internet connection and try again.",
         };
       case "notFound":
         return {
           icon: "Search",
-          title: "Not Found",
+          title: "Not Found", 
           description: "The requested item could not be found.",
         };
       case "permission":
@@ -21,6 +21,18 @@ const Error = ({ message = "Something went wrong", onRetry, type = "default" }) 
           icon: "Lock",
           title: "Access Denied",
           description: "You don't have permission to access this resource.",
+        };
+      case "server":
+        return {
+          icon: "Server",
+          title: "Server Error",
+          description: "The server encountered an error. Please try again later.",
+        };
+      case "timeout":
+        return {
+          icon: "Clock",
+          title: "Request Timeout",
+          description: "The request took too long to complete. Please try again.",
         };
       default:
         return {

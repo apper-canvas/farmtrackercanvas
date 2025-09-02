@@ -40,16 +40,28 @@ const loadDashboardData = async () => {
       setFields(fieldsData);
       setActivities(activitiesData.slice(0, 5)); // Get recent activities
       setTasks(tasksData);
-    } catch (err) {
-      setError("Failed to load dashboard data");
+} catch (err) {
       console.error("Dashboard error:", err);
+      // Determine error type for better user feedback
+      let errorMessage = "Failed to load dashboard data";
+      let errorType = "default";
+      
+      if (err.message === 'Network Error' || err.code === 'NETWORK_ERROR') {
+        errorMessage = "Unable to connect to server";
+        errorType = "network";
+      } else if (err.message?.includes('fetch')) {
+        errorMessage = "Failed to load data from server";
+        errorType = "network";
+      }
+      
+      setError({ message: errorMessage, type: errorType });
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) return <Loading type="cards" />;
-  if (error) return <Error message={error} onRetry={loadDashboardData} />;
+if (error) return <Error message={error.message || error} type={error.type || "default"} onRetry={loadDashboardData} />;
 
   // Calculate metrics
   const totalFields = fields.length;
