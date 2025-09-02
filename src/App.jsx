@@ -8,6 +8,7 @@ import Dashboard from "@/components/pages/Dashboard";
 import Fields from "@/components/pages/Fields";
 import Crops from "@/components/pages/Crops";
 import Equipment from "@/components/pages/Equipment";
+import Financial from "@/components/pages/Financial";
 import Alerts from "@/components/pages/Alerts";
 import Reports from "@/components/pages/Reports";
 import Settings from "@/components/pages/Settings";
@@ -17,7 +18,6 @@ import Callback from '@/components/pages/Callback';
 import ErrorPage from '@/components/pages/ErrorPage';
 import ResetPassword from '@/components/pages/ResetPassword';
 import PromptPassword from '@/components/pages/PromptPassword';
-
 // Create auth context
 export const AuthContext = createContext(null);
 
@@ -131,11 +131,12 @@ function App() {
           <Route path="/error" element={<ErrorPage />} />
           <Route path="/prompt-password/:appId/:emailAddress/:provider" element={<PromptPassword />} />
           <Route path="/reset-password/:appId/:fields" element={<ResetPassword />} />
-          <Route path="/" element={<Layout />}>
+<Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="fields" element={<Fields />} />
             <Route path="crops" element={<Crops />} />
             <Route path="equipment" element={<Equipment />} />
+            <Route path="financial" element={<Financial />} />
             <Route path="alerts" element={<Alerts />} />
             <Route path="reports" element={<Reports />} />
             <Route path="settings" element={<Settings />} />

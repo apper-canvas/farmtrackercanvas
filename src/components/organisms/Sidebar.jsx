@@ -7,7 +7,7 @@ const Sidebar = ({ className }) => {
   const location = useLocation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   
-  const navigationItems = [
+const navigationItems = [
     {
       name: "Dashboard",
       href: "/",
@@ -31,6 +31,12 @@ const Sidebar = ({ className }) => {
       href: "/equipment",
       icon: "Wrench",
       current: location.pathname === "/equipment"
+    },
+    {
+      name: "Financial",
+      href: "/financial",
+      icon: "DollarSign",
+      current: location.pathname === "/financial"
     },
     {
       name: "Reports",
